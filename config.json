@@ -1,0 +1,13 @@
+{
+    "amazon":{
+        "UserPoolId": "us-east-2",
+        "ClientId": "Seckey"
+    },
+    "rekognition":{
+		"accessKeyId": "AccKey",
+		"secretAccessKey": "SecretKey//6lPy3y+K8R",
+		"region": "us-west-2",
+		"apiVersion": "2016-06-27"
+    }
+    
+}
