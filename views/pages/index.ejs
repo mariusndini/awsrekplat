@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  <!-- Custom styles for this template -->
+  <link href="http://52.14.72.67:20000/css/signup.css" rel="stylesheet">
+
+  <title>CLG Labs</title>
+
+
+</head>
+  <body class="text-center">
+      <form class="form-signin" action="/login" method="POST">
+        <button class="btn btn-lg btn-success btn-block" type="submit" onclick="location.href = '/signup';">Sign Up</button>
+        <br><br><br> 
+
+        <h1 class="h3 mb-3 font-weight-normal">Sign in</h1>
+        <label for="inputEmail" class="sr-only">Email</label>
+        <input type="email" id="email" name="email" class="form-control" placeholder="Email" required autofocus>
+         
+        <label for="inputPassword" class="sr-only">Password</label>
+        <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+        <div class="checkbox mb-3">
+          <label>
+            <input type="checkbox" value="remember-me"> Remember me
+          </label>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+
+        <p class="mt-5 mb-3 text-muted">&copy;</p>
+      </form>
+    </body>
+</html>

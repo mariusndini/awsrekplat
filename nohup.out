@@ -1,0 +1,65 @@
+
+> ledgerSDK@0.0.1 start /home/ubuntu/server/app
+> node server
+
+SERVER START -p: 20000
+[90mGET / [32m200 [90m18ms - 1.54kb[0m
+[90mGET /css/signup.css [32m200 [90m5ms - 1.1kb[0m
+[90mGET / [36m304 [90m3ms[0m
+[90mGET /css/signup.css [36m304 [90m1ms[0m
+[90mGET / [36m304 [90m2ms[0m
+[90mGET /css/signup.css [36m304 [90m0ms[0m
+[90mGET / [36m304 [90m1ms[0m
+[90mGET /css/signup.css [36m304 [90m1ms[0m
+[90mGET / [36m304 [90m1ms[0m
+[90mGET /css/signup.css [36m304 [90m1ms[0m
+[90mGET / [36m304 [90m1ms[0m
+[90mGET /css/signup.css [36m304 [90m0ms[0m
+[90mGET / [36m304 [90m6ms[0m
+[90mGET /css/signup.css [36m304 [90m1ms[0m
+[90mGET / [36m304 [90m1ms[0m
+[90mGET /css/signup.css [36m304 [90m0ms[0m
+[90mGET / [36m304 [90m2ms[0m
+[90mGET /css/signup.css [36m304 [90m1ms[0m
+[90mGET / [36m304 [90m1ms[0m
+[90mGET /css/signup.css [36m304 [90m0ms[0m
+[90mGET /signup [32m200 [90m2ms - 1.69kb[0m
+[90mGET /css/signup.css [36m304 [90m1ms[0m
+[90mGET / [36m304 [90m1ms[0m
+[90mGET /css/signup.css [36m304 [90m0ms[0m
+[90mGET / [32m200 [90m2ms - 1.54kb[0m
+[90mGET /css/signup.css [32m200 [90m1ms - 1.1kb[0m
+[90mGET /signup [32m200 [90m2ms - 1.69kb[0m
+[90mGET /css/signup.css [36m304 [90m1ms[0m
+[90mPOST /signup [32m200 [90m141ms - 152b[0m
+[90mGET /signup [32m200 [90m1ms - 1.69kb[0m
+[90mGET / [32m200 [90m1ms - 1.54kb[0m
+[90mGET /css/signup.css [32m200 [90m1ms - 1.1kb[0m
+[90mGET /signup [32m200 [90m1ms - 1.69kb[0m
+[90mGET /css/signup.css [36m304 [90m0ms[0m
+[ 'Password must be at least 8 chars long',
+  'Password does not contain special character',
+  'Password does not lower case',
+  'Password does not upper case' ]
+[90mPOST /signup [36m302 [90m13ms - 58b[0m
+[90mGET /signup [32m200 [90m2ms - 1.69kb[0m
+[90mGET /css/signup.css [36m304 [90m0ms[0m
+[ 'Password does not match' ]
+[90mPOST /signup [36m302 [90m3ms - 58b[0m
+[90mGET /signup [32m200 [90m1ms - 1.69kb[0m
+[90mGET /css/signup.css [36m304 [90m1ms[0m
+[90mGET / [36m304 [90m1ms[0m
+[90mGET /css/signup.css [36m304 [90m1ms[0m
+UserNotFoundException
+[90mPOST /login [32m200 [90m304ms - 121b[0m
+UserNotFoundException
+[90mPOST /login [32m200 [90m220ms - 121b[0m
+[90mGET /signup [36m304 [90m2ms[0m
+[90mGET /css/signup.css [36m304 [90m0ms[0m
+[90mPOST /signup [32m200 [90m507ms - 21b[0m
+[90mGET /signup [32m200 [90m3ms - 1.69kb[0m
+[90mPOST /login [32m200 [90m810ms - 2.9kb[0m
+[90mGET /css/signup.css [36m304 [90m1ms[0m
+[90mGET /login [33m404 [90m2ms[0m
+[90mGET /login [33m404 [90m1ms[0m
+[90mGET /css/signup.css [36m304 [90m0ms[0m
