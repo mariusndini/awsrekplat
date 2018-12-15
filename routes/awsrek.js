@@ -19,9 +19,7 @@ router.post('/collection/create', (req,res)=>{
 			return res.status(200).json({status:'error', err: err.stack});
 		}else{
 			return res.status(200).json({status:'success', data:data});
-
 		}
-
 	});
 
 });
@@ -36,7 +34,6 @@ router.post('/collection/delete', (req,res)=>{
 			return res.status(200).json({status:'error', err: err.stack});
 		}else{
 			return res.status(200).json({status:'success', data:data});
-
 		}
 
 	});
@@ -73,10 +70,18 @@ router.post('/collection/indexFaces', (req,res)=>{
 		}
 	};
 
+	let name = req.body.name || "unk";
+
 	rekognition.indexFaces(params, function(err, data) {
 		if (err){ 
 			return res.status(200).json({status:'error', err: err.stack});
 		}else{
+			var dyndata = {
+			    "id": { S: data.FaceRecords[0].Face.FaceId },
+			    "name":{ "S" : name }
+			  }
+			dynsave(dyndata);
+
 			return res.status(200).json({status:'success', data:data});
 		}
 
@@ -101,6 +106,10 @@ router.post('/collection/searchImage', (req,res)=>{
 		if (err){ 
 			return res.status(200).json({status:'error', err: err.stack});
 		}else{
+			var dyndata= {
+			    "id": { S: data.FaceMatches[0].Face.FaceId }
+			};
+			dynget(dyndata);
 			return res.status(200).json({status:'success', data:data});
 		}
 
@@ -153,6 +162,69 @@ router.post('/collection/detectFaces', (req,res)=>{
 	});
 
 });
+
+
+/*
+//s3 test code
+var s3 = new AWS.S3(config.S3);
+
+//console.log(s3.listAlbums);
+
+s3.listObjects({Delimiter: '/'}, function(err, data) {
+        console.log(data);
+
+});
+*/
+
+
+
+
+
+var dyndb = new AWS.DynamoDB(config.dyndb);
+function dynsave(data){
+	params = {
+	  TableName: 'faces', 
+	  Item: data
+	  /* Item: {
+	    "id": { S: "0" },
+	    "name":{ "S" : "marius" },
+	    "faces":{ "S" : "00-00-11-00" }
+	  } */
+	};
+
+	// Call DynamoDB to add the item to the table
+	dyndb.putItem(params, function(err, data) {
+	  if (err) {
+	    console.log("Error", err);
+	  } else {
+		console.log("Success", data);
+	  }
+	});	
+}
+
+function dynget(data){
+	params = {
+	  TableName: 'faces', 
+	  Key: data 
+	  /*{
+	    "id": { S: "02bedb93-15d1-4e2e-8523-4dd9045f2434" }
+		}
+		*/
+	};
+
+	// Call DynamoDB to add the item to the table
+	dyndb.getItem(params, function(err, data) {
+	  if (err) {
+	    console.log("Error", err);
+	  } else {
+		console.log(data);
+	  }
+	});	
+}
+
+
+
+
 
 
 module.exports = router;
