@@ -1,0 +1,245 @@
+[1mdiff --git a/config.json b/config.json[m
+[1mindex 3853745..6e734d1 100644[m
+[1m--- a/config.json[m
+[1m+++ b/config.json[m
+[36m@@ -1,13 +1,29 @@[m
+ {[m
+     "amazon":{[m
+[31m-        "UserPoolId": "us-east-2",[m
+[31m-        "ClientId": "Seckey"[m
+[32m+[m[32m        "UserPoolId": "us-east-2_7EEHLBK1g",[m
+[32m+[m[32m        "ClientId": "s3ofc9fgi83k8mnlce3lt0e5v"[m
+     },[m
+     "rekognition":{[m
+[31m-		"accessKeyId": "AccKey",[m
+[31m-		"secretAccessKey": "SecretKey//6lPy3y+K8R",[m
+[31m-		"region": "us-west-2",[m
+[31m-		"apiVersion": "2016-06-27"[m
+[32m+[m[32m        "accessKeyId": "AKIAIHLZJJKAOE33FGEQ",[m
+[32m+[m[32m        "secretAccessKey": "/EkuLOn2TEF0sAtN6c0IlgEUoaRHl/6lPy3y+K8R",[m
+[32m+[m[32m        "region": "us-west-2",[m
+[32m+[m[32m        "apiVersion": "2016-06-27"[m
+[32m+[m[32m    },[m
+[32m+[m
+[32m+[m[32m    "S3":{[m
+[32m+[m[32m        "Bucket":"rekimagesmarius",[m
+[32m+[m[32m        "accessKeyId": "AKIAIHLZJJKAOE33FGEQ",[m
+[32m+[m[32m        "secretAccessKey": "/EkuLOn2TEF0sAtN6c0IlgEUoaRHl/6lPy3y+K8R"[m
+[32m+[m[32m    },[m
+[32m+[m[32m    "dyndb":{[m
+[32m+[m[32m        "region": "us-east-2",[m
+[32m+[m[32m        "accessKeyId": "AKIAIHLZJJKAOE33FGEQ",[m
+[32m+[m[32m        "secretAccessKey": "/EkuLOn2TEF0sAtN6c0IlgEUoaRHl/6lPy3y+K8R",[m
+[32m+[m[32m        "apiVersion": "2012-08-10"[m
+[32m+[m
+[32m+[m
+     }[m
+[31m-    [m
+[31m-}[m
+\ No newline at end of file[m
+[32m+[m[32m}[m
+[41m+[m
+[41m+[m
+[41m+[m
+[1mdiff --git a/package.json b/package.json[m
+[1mindex cb83ba5..245efbc 100644[m
+[1m--- a/package.json[m
+[1m+++ b/package.json[m
+[36m@@ -10,6 +10,7 @@[m
+     "body-parser": "~1.0.0",[m
+     "cookie-parser": "~1.0.1",[m
+     "debug": "~0.7.4",[m
+[32m+[m[32m    "ejs": "^2.6.1",[m
+     "es6-promise": "^4.2.5",[m
+     "express": "~4.0.0",[m
+     "express-session": "^1.15.6",[m
+[1mdiff --git a/routes/awsrek.js b/routes/awsrek.js[m
+[1mindex 0e69993..e06df45 100644[m
+[1m--- a/routes/awsrek.js[m
+[1m+++ b/routes/awsrek.js[m
+[36m@@ -106,17 +106,43 @@[m [mrouter.post('/collection/searchImage', (req,res)=>{[m
+ 		if (err){ [m
+ 			return res.status(200).json({status:'error', err: err.stack});[m
+ 		}else{[m
+[31m-			var dyndata= {[m
+[31m-			    "id": { S: data.FaceMatches[0].Face.FaceId }[m
+[31m-			};[m
+[31m-			dynget(dyndata);[m
+[31m-			return res.status(200).json({status:'success', data:data});[m
+[32m+[m			[32mvar promises = [];[m
+[32m+[m			[32mfor(i=0; i < data.FaceMatches.length; i++){[m
+[32m+[m				[32mvar dyndata= {[m
+[32m+[m				[32m    "id": { S: data.FaceMatches[i].Face.FaceId }[m
+[32m+[m				[32m};[m
+[32m+[m
+[32m+[m				[32mpromises.push(dynget(dyndata))[m
+[32m+[m			[32m}[m
+[32m+[m
+[32m+[m			[32mPromise.all(promises)[m[41m    [m
+[32m+[m			[32m.then(function(data){[m[41m [m
+[32m+[m				[32mif(data.length == 0){[m
+[32m+[m					[32mreturn res.status(200).json({status:'success', data: data});[m
+[32m+[m				[32m}[m
+[32m+[m
+[32m+[m				[32mfor(var item in data){[m
+[32m+[m					[32mif(data[item].Item){[m
+[32m+[m						[32m//console.log(data[item]);[m
+[32m+[m						[32mreturn res.status(200).json({status:'success', data: data[item]});[m
+[32m+[m
+[32m+[m					[32m}[m
+[32m+[m				[32m}[m
+[32m+[m
+[32m+[m			[32m})[m
+[32m+[m			[32m.catch(function(err){[m[41m [m
+[32m+[m				[32mconsole.log({"err": "searchFacesByImage", e:errs});[m
+[32m+[m			[32m});[m
+[32m+[m
+[32m+[m			[32m//console.log(data);[m
+[32m+[m
+ 		}[m
+ [m
+ 	});[m
+ [m
+ });[m
+ [m
+[32m+[m[32m/*[m
+ router.post('/collection/searchImage', (req,res)=>{[m
+ 	var params = {[m
+ 		CollectionId: req.body.CollectionId, [m
+[36m@@ -140,6 +166,7 @@[m [mrouter.post('/collection/searchImage', (req,res)=>{[m
+ 	});[m
+ [m
+ });[m
+[32m+[m[32m*/[m
+ [m
+ router.post('/collection/detectFaces', (req,res)=>{[m
+ 	var params = {[m
+[36m@@ -148,8 +175,8 @@[m [mrouter.post('/collection/detectFaces', (req,res)=>{[m
+ 			Bucket: "rekimagesmarius", [m
+ 			Name: req.body.image[m
+ 			}[m
+[31m-		}[m
+[31m-		/*,Attributes: ["ALL"]*/[m
+[32m+[m		[32m},[m
+[32m+[m		[32mAttributes: ["DEFAULT"][m
+ 	};[m
+ [m
+ 	rekognition.detectFaces(params, function(err, data) {[m
+[36m@@ -164,22 +191,69 @@[m [mrouter.post('/collection/detectFaces', (req,res)=>{[m
+ });[m
+ [m
+ [m
+[31m-/*[m
+[32m+[m
+ //s3 test code[m
+ var s3 = new AWS.S3(config.S3);[m
+ [m
+[31m-//console.log(s3.listAlbums);[m
+[32m+[m[32mvar request = require('request');[m
+[32m+[m
+[32m+[m[32mvar download = function(uri, filename, callback){[m
+[32m+[m[32m var options = {[m
+[32m+[m[32m        uri: uri,[m
+[32m+[m[32m        encoding: null[m
+[32m+[m[32m    };[m
+[32m+[m[32m    request(options, function(error, response, body) {[m
+[32m+[m[32m        if (error || response.statusCode !== 200) {[m[41m [m
+[32m+[m[32m            console.log("failed to get image");[m
+[32m+[m[32m            console.log(error);[m
+[32m+[m[32m        } else {[m
+[32m+[m[32m            s3.putObject({[m
+[32m+[m[32m                Body: body,[m
+[32m+[m[32m                Key: filename,[m
+[32m+[m[32m                Bucket: config.S3.Bucket[m
+[32m+[m
+[32m+[m[32m            }, function(error, data) {[m[41m [m
+[32m+[m[32m                if (error) {[m
+[32m+[m[32m                    console.log("error downloading image to s3");[m
+[32m+[m[32m                } else {[m
+[32m+[m[32m                    console.log("success uploading to s3");[m
+[32m+[m[32m                    callback();[m
+[32m+[m[32m                }[m
+[32m+[m[32m            });[m[41m [m
+[32m+[m[32m        }[m[41m   [m
+[32m+[m[32m    });[m
+[32m+[m
+[32m+[m
+[32m+[m
+[32m+[m[32m};[m
+[32m+[m
+[32m+[m
+[32m+[m[32mrouter.post('/bucket/saveObject', (req,res)=>{[m
+[32m+[m	[32mvar link = req.body.link;[m
+[32m+[m	[32mvar name = req.body.name;[m
+[32m+[m
+[32m+[m	[32mdownload(link, name, function(){[m
+[32m+[m		[32mreturn res.status(200).json({status:'success', data: 'Object Uploaded'});[m
+[32m+[m	[32m});[m
+ [m
+[31m-s3.listObjects({Delimiter: '/'}, function(err, data) {[m
+[31m-        console.log(data);[m
+ [m
+ });[m
+[31m-*/[m
+ [m
+ [m
+ [m
+ [m
+ [m
+[32m+[m[32mrouter.get('/bucket/listObjects', (req,res)=>{[m
+[32m+[m	[32ms3.listObjects({Bucket: config.S3.Bucket, Delimiter: '/'}, function(err, data) {[m
+[32m+[m		[32mreturn res.status(200).json({status:'success', data: data});[m
+[32m+[m	[32m});[m
+[32m+[m
+[32m+[m
+[32m+[m[32m});[m
+[32m+[m
+[32m+[m
+[32m+[m
+[32m+[m
+ var dyndb = new AWS.DynamoDB(config.dyndb);[m
+ function dynsave(data){[m
+ 	params = {[m
+[36m@@ -212,15 +286,18 @@[m [mfunction dynget(data){[m
+ 		*/[m
+ 	};[m
+ [m
+[31m-	// Call DynamoDB to add the item to the table[m
+[31m-	dyndb.getItem(params, function(err, data) {[m
+[31m-	  if (err) {[m
+[31m-	    console.log("Error", err);[m
+[31m-	  } else {[m
+[31m-		console.log(data);[m
+[31m-	  }[m
+[31m-	});	[m
+[31m-}[m
+[32m+[m
+[32m+[m	[32mreturn new Promise(resolve => {dyndb.getItem(params, function(err, data) {[m
+[32m+[m		[32m  if (err) {[m
+[32m+[m		[32m    console.log("Error", err);[m
+[32m+[m		[32m  } else {[m
+[32m+[m		[41m  [m	[32mresolve(data);[m
+[32m+[m		[32m  }[m
+[32m+[m		[32m})[m
+[32m+[m
+[32m+[m	[32m});[m
+[32m+[m
+[32m+[m[32m}//end dyn get[m
+ [m
+ [m
+ [m
+[1mdiff --git a/routes/users.js b/routes/users.js[m
+[1mindex 339cdab..081ad84 100644[m
+[1m--- a/routes/users.js[m
+[1m+++ b/routes/users.js[m
+[36m@@ -23,6 +23,10 @@[m [mrouter.get('/signup', function(req, res) {[m
+ 	res.render('pages/signup');[m
+ });[m
+ [m
+[32m+[m[32mrouter.get('/admin', function(req, res) {[m
+[32m+[m	[32mres.render('pages/admin');[m
+[32m+[m[32m});[m
+[32m+[m
+ //PW check function[m
+ const getPasswordErrors = (req, source)=>{[m
+ 	if (source == 'sign-up'){[m

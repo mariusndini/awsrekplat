@@ -106,17 +106,43 @@ router.post('/collection/searchImage', (req,res)=>{
 		if (err){ 
 			return res.status(200).json({status:'error', err: err.stack});
 		}else{
-			var dyndata= {
-			    "id": { S: data.FaceMatches[0].Face.FaceId }
-			};
-			dynget(dyndata);
-			return res.status(200).json({status:'success', data:data});
+			var promises = [];
+			for(i=0; i < data.FaceMatches.length; i++){
+				var dyndata= {
+				    "id": { S: data.FaceMatches[i].Face.FaceId }
+				};
+
+				promises.push(dynget(dyndata))
+			}
+
+			Promise.all(promises)    
+			.then(function(data){ 
+				if(data.length == 0){
+					return res.status(200).json({status:'success', data: data});
+				}
+
+				for(var item in data){
+					if(data[item].Item){
+						//console.log(data[item]);
+						return res.status(200).json({status:'success', data: data[item]});
+
+					}
+				}
+
+			})
+			.catch(function(err){ 
+				console.log({"err": "searchFacesByImage", e:errs});
+			});
+
+			//console.log(data);
+
 		}
 
 	});
 
 });
 
+/*
 router.post('/collection/searchImage', (req,res)=>{
 	var params = {
 		CollectionId: req.body.CollectionId, 
@@ -140,6 +166,7 @@ router.post('/collection/searchImage', (req,res)=>{
 	});
 
 });
+*/
 
 router.post('/collection/detectFaces', (req,res)=>{
 	var params = {
@@ -148,8 +175,8 @@ router.post('/collection/detectFaces', (req,res)=>{
 			Bucket: "rekimagesmarius", 
 			Name: req.body.image
 			}
-		}
-		/*,Attributes: ["ALL"]*/
+		},
+		Attributes: ["DEFAULT"]
 	};
 
 	rekognition.detectFaces(params, function(err, data) {
@@ -164,18 +191,65 @@ router.post('/collection/detectFaces', (req,res)=>{
 });
 
 
-/*
+
 //s3 test code
 var s3 = new AWS.S3(config.S3);
 
-//console.log(s3.listAlbums);
+var request = require('request');
 
-s3.listObjects({Delimiter: '/'}, function(err, data) {
-        console.log(data);
+var download = function(uri, filename, callback){
+ var options = {
+        uri: uri,
+        encoding: null
+    };
+    request(options, function(error, response, body) {
+        if (error || response.statusCode !== 200) { 
+            console.log("failed to get image");
+            console.log(error);
+        } else {
+            s3.putObject({
+                Body: body,
+                Key: filename,
+                Bucket: config.S3.Bucket
+
+            }, function(error, data) { 
+                if (error) {
+                    console.log("error downloading image to s3");
+                } else {
+                    console.log("success uploading to s3");
+                    callback();
+                }
+            }); 
+        }   
+    });
+
+
+
+};
+
+
+router.post('/bucket/saveObject', (req,res)=>{
+	var link = req.body.link;
+	var name = req.body.name;
+
+	download(link, name, function(){
+		return res.status(200).json({status:'success', data: 'Object Uploaded'});
+	});
+
 
 });
-*/
 
+
+
+
+
+router.get('/bucket/listObjects', (req,res)=>{
+	s3.listObjects({Bucket: config.S3.Bucket, Delimiter: '/'}, function(err, data) {
+		return res.status(200).json({status:'success', data: data});
+	});
+
+
+});
 
 
 
@@ -212,15 +286,18 @@ function dynget(data){
 		*/
 	};
 
-	// Call DynamoDB to add the item to the table
-	dyndb.getItem(params, function(err, data) {
-	  if (err) {
-	    console.log("Error", err);
-	  } else {
-		console.log(data);
-	  }
-	});	
-}
+
+	return new Promise(resolve => {dyndb.getItem(params, function(err, data) {
+		  if (err) {
+		    console.log("Error", err);
+		  } else {
+		  	resolve(data);
+		  }
+		})
+
+	});
+
+}//end dyn get
 
 
 

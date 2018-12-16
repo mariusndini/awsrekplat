@@ -23,6 +23,10 @@ router.get('/signup', function(req, res) {
 	res.render('pages/signup');
 });
 
+router.get('/admin', function(req, res) {
+	res.render('pages/admin');
+});
+
 //PW check function
 const getPasswordErrors = (req, source)=>{
 	if (source == 'sign-up'){
