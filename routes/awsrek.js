@@ -218,11 +218,12 @@ function detectFaces(image, cb){
 
 }
 
+/*
 detectFaces('tet.jpg',(d)=>{
 	console.log(d); 
 
 });
-
+*/
 
 
 //s3 test code
@@ -434,7 +435,7 @@ var allFaceData = {
 
 var jimp = require('jimp');
 
-s3.getObject({ Bucket: config.S3.Bucket, Key: "mo.jpg" },
+s3.getObject({ Bucket: config.S3.Bucket, Key: "mo2.jpg" },
 	function (error, data) {
 		if (error != null) {
 			console.log("Failed to retrieve an object: " + error);
@@ -445,7 +446,44 @@ s3.getObject({ Bucket: config.S3.Bucket, Key: "mo.jpg" },
     			var h = image.bitmap.height;
 				
     			var faces = allFaceData.data.FaceDetails;
+    			var clone; //
 
+    			var promises = []
+    			for( i=0; i < faces.length; i++ ){
+    				clone = image.clone().crop(w*faces[i].BoundingBox.Left, h*faces[i].BoundingBox.Top, w*faces[i].BoundingBox.Width, h*faces[i].BoundingBox.Height);
+					promises.push(clone.getBuffer(jimp.MIME_JPEG, ()=>{} ));
+
+    			}
+
+
+    			var proms = []
+    			Promise.all(promises)    
+				.then(function(data){ 
+					for(i=0; i<data.length; i++){
+						console.log(data[i].write("a"+i+".jpg"));
+						proms.push(s3.putObject({
+			                Body: data[i].image,
+			                Key: ('f'+i+'.' + '_img') + '.jpg',
+			                Bucket: config.S3.Bucket
+				            },()=>{}));
+					}
+
+    				Promise.all(proms)    
+					.then(function(data){
+						console.log('done');
+					})
+
+
+
+
+				})
+				.catch(function(err){ 
+					console.log({"status": "error", e:err});
+				});
+
+
+
+/*
 				var clone = image.clone().crop(w*faces[0].BoundingBox.Left, h*faces[0].BoundingBox.Top, w*faces[0].BoundingBox.Width, h*faces[0].BoundingBox.Height);
 				clone.getBuffer(jimp.MIME_JPEG, (error, result)=>{
 					s3.putObject({
@@ -473,18 +511,15 @@ s3.getObject({ Bucket: config.S3.Bucket, Key: "mo.jpg" },
 							                    console.log("success uploading to s3- 1");
 							                }
 							            }); 
-								})
+								})//end inner clone
+			                }//end error if
 
 
+			            }); //end function
 
 
-
-
-
-			                }
-			            }); 
-				})
-
+				})//end put object
+*/
 			});
 
 		}
