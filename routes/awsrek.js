@@ -435,7 +435,7 @@ var allFaceData = {
 
 var jimp = require('jimp');
 
-s3.getObject({ Bucket: config.S3.Bucket, Key: "mo2.jpg" },
+s3.getObject({ Bucket: config.S3.Bucket, Key: "mo.jpg" },
 	function (error, data) {
 		if (error != null) {
 			console.log("Failed to retrieve an object: " + error);
@@ -451,30 +451,24 @@ s3.getObject({ Bucket: config.S3.Bucket, Key: "mo2.jpg" },
     			var promises = []
     			for( i=0; i < faces.length; i++ ){
     				clone = image.clone().crop(w*faces[i].BoundingBox.Left, h*faces[i].BoundingBox.Top, w*faces[i].BoundingBox.Width, h*faces[i].BoundingBox.Height);
-					promises.push(clone.getBuffer(jimp.MIME_JPEG, ()=>{} ));
+					promises.push(clone.getBuffer(jimp.MIME_JPEG, (err, data)=>{
+						var callback = function(error, data) { 
+			                if (error) {
+			                    console.log({'status':'error', err:error});
+			                } else {
+			                    console.log({'status':'success', data:data});
+			                }
+			            };
 
-    			}
+						s3.putObject({ Body: data, Key: 'faces/f'+i+'.' + '_img.jpg', Bucket: config.S3.Bucket}, callback);
 
+					}));//end adding promises
 
-    			var proms = []
+    			}//end for loop
+
     			Promise.all(promises)    
 				.then(function(data){ 
-					for(i=0; i<data.length; i++){
-						console.log(data[i].write("a"+i+".jpg"));
-						proms.push(s3.putObject({
-			                Body: data[i].image,
-			                Key: ('f'+i+'.' + '_img') + '.jpg',
-			                Bucket: config.S3.Bucket
-				            },()=>{}));
-					}
-
-    				Promise.all(proms)    
-					.then(function(data){
-						console.log('done');
-					})
-
-
-
+					console.log('done');
 
 				})
 				.catch(function(err){ 
