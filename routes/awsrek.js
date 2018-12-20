@@ -330,10 +330,11 @@ function dynget(data){
 
 
 
-
 var jimp = require('jimp');
 
 function dissectFaces(s3img){
+	var st = new Date().getTime();
+
 	s3.getObject({ Bucket: config.S3.Bucket, Key: s3img },
 		function (error, data) {
 			if (error != null) {
@@ -372,7 +373,7 @@ function dissectFaces(s3img){
 
 		    			Promise.all(promises)    
 						.then(function(data){ 
-							console.log('done');
+							console.log('Loop--  ' + ((st - (new Date().getTime()))/1000 ));
 
 						})
 						.catch(function(err){ 
@@ -395,10 +396,7 @@ function dissectFaces(s3img){
 	
 
 
-dissectFaces ('jenTest.jpg');
-
-
-
+dissectFaces ('mo.jpg');
 
 function searchImage(s3img){
 	var params = {
@@ -452,6 +450,7 @@ function searchImage(s3img){
 
 
 }
+
 
 
 

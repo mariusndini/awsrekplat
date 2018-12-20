@@ -9,6 +9,7 @@ var uuid = require('uuid/v4')
 var session = require('express-session')
 var expressValidator = require('express-validator');
 
+
 var app = express();
 app.set('view engine', 'ejs');
 
@@ -45,6 +46,13 @@ app.use('/', routes);
 
 //var accounts = require('./routes/accounts');
 //app.use('/accounts', accounts)
+
+//delete later
+var P = require('./imgPromise.js');
+P.img();
+
+
+
 
 
 module.exports = app;
