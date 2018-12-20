@@ -218,12 +218,6 @@ function detectFaces(image, cb){
 
 }
 
-/*
-detectFaces('tet.jpg',(d)=>{
-	console.log(d); 
-
-});
-*/
 
 
 //s3 test code
@@ -334,195 +328,130 @@ function dynget(data){
 }//end dyn get
 
 
-var allFaceData = {
-    "status": "success",
-    "data": {
-        "FaceDetails": [
-            {
-                "BoundingBox": {
-                    "Width": 0.1563405692577362,
-                    "Height": 0.1518653780221939,
-                    "Left": 0.31902414560317993,
-                    "Top": 0.1681743562221527
-                },
-                "Landmarks": [
-                    {
-                        "Type": "eyeLeft",
-                        "X": 0.382906436920166,
-                        "Y": 0.2244488000869751
-                    },
-                    {
-                        "Type": "eyeRight",
-                        "X": 0.44367897510528564,
-                        "Y": 0.22503553330898285
-                    },
-                    {
-                        "Type": "mouthLeft",
-                        "X": 0.398097962141037,
-                        "Y": 0.27416107058525085
-                    },
-                    {
-                        "Type": "mouthRight",
-                        "X": 0.447722464799881,
-                        "Y": 0.2746689021587372
-                    },
-                    {
-                        "Type": "nose",
-                        "X": 0.43794775009155273,
-                        "Y": 0.2428121417760849
-                    }
-                ],
-                "Pose": {
-                    "Roll": 1.3068028688430786,
-                    "Yaw": 14.021855354309082,
-                    "Pitch": 24.210594177246094
-                },
-                "Quality": {
-                    "Brightness": 80.22309112548828,
-                    "Sharpness": 67.22731018066406
-                },
-                "Confidence": 100
-            },
-            {
-                "BoundingBox": {
-                    "Width": 0.15658625960350037,
-                    "Height": 0.14998100697994232,
-                    "Left": 0.4697798788547516,
-                    "Top": 0.25029563903808594
-                },
-                "Landmarks": [
-                    {
-                        "Type": "eyeLeft",
-                        "X": 0.49220114946365356,
-                        "Y": 0.31761133670806885
-                    },
-                    {
-                        "Type": "eyeRight",
-                        "X": 0.5564708113670349,
-                        "Y": 0.30023306608200073
-                    },
-                    {
-                        "Type": "mouthLeft",
-                        "X": 0.523472011089325,
-                        "Y": 0.3653060793876648
-                    },
-                    {
-                        "Type": "mouthRight",
-                        "X": 0.5764919519424438,
-                        "Y": 0.35095569491386414
-                    },
-                    {
-                        "Type": "nose",
-                        "X": 0.5295129418373108,
-                        "Y": 0.3331208825111389
-                    }
-                ],
-                "Pose": {
-                    "Roll": -21.62548065185547,
-                    "Yaw": -2.570434808731079,
-                    "Pitch": 7.624760150909424
-                },
-                "Quality": {
-                    "Brightness": 56.85871887207031,
-                    "Sharpness": 86.86019134521484
-                },
-                "Confidence": 99.99998474121094
-            }
-        ]
-    }
-};
+
 
 
 var jimp = require('jimp');
 
-s3.getObject({ Bucket: config.S3.Bucket, Key: "mo.jpg" },
-	function (error, data) {
-		if (error != null) {
-			console.log("Failed to retrieve an object: " + error);
-		} else {
-
-			var img = new jimp(data.Body, (err, image)=>{
-				var w = image.bitmap.width; 
-    			var h = image.bitmap.height;
-				
-    			var faces = allFaceData.data.FaceDetails;
-    			var clone; //
-
-    			var promises = []
-    			for( i=0; i < faces.length; i++ ){
-    				clone = image.clone().crop(w*faces[i].BoundingBox.Left, h*faces[i].BoundingBox.Top, w*faces[i].BoundingBox.Width, h*faces[i].BoundingBox.Height);
-					promises.push(clone.getBuffer(jimp.MIME_JPEG, (err, data)=>{
-						var callback = function(error, data) { 
-			                if (error) {
-			                    console.log({'status':'error', err:error});
-			                } else {
-			                    console.log({'status':'success', data:data});
-			                }
-			            };
-
-						s3.putObject({ Body: data, Key: 'faces/f'+i+'.' + '_img.jpg', Bucket: config.S3.Bucket}, callback);
-
-					}));//end adding promises
-
-    			}//end for loop
-
-    			Promise.all(promises)    
-				.then(function(data){ 
-					console.log('done');
-
-				})
-				.catch(function(err){ 
-					console.log({"status": "error", e:err});
-				});
+function dissectFaces(s3img){
+	s3.getObject({ Bucket: config.S3.Bucket, Key: s3img },
+		function (error, data) {
+			if (error != null) {
+				console.log("Failed to retrieve an object: " + error);
+			} else {
 
 
+				function doJimp(allFaces){
+					var img = new jimp(data.Body, (err, image)=>{
+						var w = image.bitmap.width; 
+		    			var h = image.bitmap.height;
+						
+		    			var faces = allFaces.data.FaceDetails;
+		    			var clone; //
 
-/*
-				var clone = image.clone().crop(w*faces[0].BoundingBox.Left, h*faces[0].BoundingBox.Top, w*faces[0].BoundingBox.Width, h*faces[0].BoundingBox.Height);
-				clone.getBuffer(jimp.MIME_JPEG, (error, result)=>{
-					s3.putObject({
-		                Body: result,
-		                Key: ('f0.' + data.ETag) + '.jpg',
-		                Bucket: config.S3.Bucket
+		    			var promises = []
+		    			for( i=0; i < faces.length; i++ ){
+		    				clone = image.clone().crop(w*faces[i].BoundingBox.Left, h*faces[i].BoundingBox.Top, w*faces[i].BoundingBox.Width, h*faces[i].BoundingBox.Height);
+							promises.push(clone.getBuffer(jimp.MIME_JPEG, (err, data)=>{
+								var callback = function(error, data) { 
+					                if (error) {
+					                    console.log({'status':'error', err:error});
+					                } else {
+					                    console.log({'status':'success', data:data});
+					                }
+					            };
 
-			            }, function(error, data) { 
-			                if (error) {
-			                    console.log("error uploading image to s3");
-			                } else {
-			                    console.log("success uploading to s3");
+					            var imgName = 'faces/f'+i+'.' + 'img.' + s3img + '.' + (new Date).getTime()+'.jpg';
+								s3.putObject({ Body: data, Key: imgName, Bucket: config.S3.Bucket}, callback);
+								
+								//searchImage(imgName); //make this an async call
 
-								clone = image.clone().crop(w*faces[1].BoundingBox.Left, h*faces[1].BoundingBox.Top, w*faces[1].BoundingBox.Width, h*faces[1].BoundingBox.Height);
-								clone.getBuffer(jimp.MIME_JPEG, (error, result)=>{
-									s3.putObject({
-						                Body: result,
-						                Key: ('f1.' + data.ETag) + '.jpg',
-						                Bucket: config.S3.Bucket
+							}));//end adding promises
 
-							            }, function(error, data) { 
-							                if (error) {
-							                    console.log("error uploading image to s3");
-							                } else {
-							                    console.log("success uploading to s3- 1");
-							                }
-							            }); 
-								})//end inner clone
-			                }//end error if
+		    			}//end for loop
 
+		    			Promise.all(promises)    
+						.then(function(data){ 
+							console.log('done');
 
-			            }); //end function
+						})
+						.catch(function(err){ 
+							console.log({"status": "error", e:err});
+						});
 
 
-				})//end put object
-*/
+					});
+
+
+				}//end doJimp function
+
+				detectFaces(s3img, (d)=>{ doJimp(d) });
+
+			}
+		}
+	);
+
+}
+	
+
+
+dissectFaces ('jenTest.jpg');
+
+
+
+
+function searchImage(s3img){
+	var params = {
+		CollectionId: 'test', 
+		FaceMatchThreshold: 90, 
+		Image: {
+				S3Object: {
+				Bucket: "rekimagesmarius", 
+				Name: s3img
+			}
+		}, 
+		MaxFaces: 5
+	};
+
+	rekognition.searchFacesByImage(params, function(err, data) {
+		if (err){ 
+			return {status:'error', err: err.stack};
+		}else{
+			var promises = [];
+			for(i=0; i < data.FaceMatches.length; i++){
+				var dyndata= {
+				    "id": { S: data.FaceMatches[i].Face.FaceId }
+				};
+
+				promises.push(dynget(dyndata))
+			}
+
+			Promise.all(promises)    
+			.then(function(data){ 
+				if(data.length == 0){
+					return {status:'success', data: data};
+				}
+
+				for(var item in data){
+					if(data[item].Item){
+						console.log({status:'success', data: data[item]});
+
+					}
+				}
+
+			})
+			.catch(function(err){ 
+				console.log({"err": "searchFacesByImage", e:errs});
 			});
 
+			//console.log(data);
+
 		}
-	}
-);
+
+	});
 
 
-
-
+}
 
 
 
