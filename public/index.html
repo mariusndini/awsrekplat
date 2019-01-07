@@ -1,0 +1,95 @@
+
+<html>
+	<head>
+		<script
+			src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+		
+		
+		<script>
+			var img = '';
+			var FR= new FileReader();
+
+
+			function hello() {
+				var data = {
+					"method": "detectFaces",
+					"img": img
+
+				}
+
+				$('#myImage').attr ('src', img );
+				$('#myImage').attr ('width', 400 );
+
+				$.post({
+					url: 'https://c4039mgor5.execute-api.us-east-2.amazonaws.com/dev/rec',
+					contentType : 'application/json',
+					crossDomain: true,
+					data: JSON.stringify(data),
+
+					success: function(body) {
+						console.log(body);
+						$('#myJson').html(JSON.stringify( body, null, 4));
+					},
+
+					error: function(err) {
+						console.log(err);
+					}
+				});
+
+			};
+
+		</script>
+	</head>
+		
+	<body>
+		<input name="uploadedfile" type="file" style:'width:100%; 10%' id="uploadPhotoButton"/>
+
+		<br>
+		<br>
+
+		<button onclick='hello()'> UPLOAD </button>
+		<br>
+		<img id='myImage'></img>
+		
+		<br>
+		<pre id='myJson'></pre>
+
+		
+	</body>
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<script>
+
+		$('input[type="file"]').change(function(e) {
+			var file = e.target.files[0];
+
+			FR.readAsDataURL( file );
+
+			FR.onload = function (event) {
+				console.log(event);
+				img = event.srcElement.result;
+
+			};
+
+		});
+		
+	</script>
+
+
+</html>
+	
+	
+	

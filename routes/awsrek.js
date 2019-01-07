@@ -8,6 +8,32 @@ var express = require('express');
 var router = express.Router();
 
 const rekognition = new AWS.Rekognition(config.rekognition)
+const polly = new AWS.Polly(config.polly);
+
+polly.describeVoices((err, data)=>{
+	//console.log(data);
+}); 
+ 
+
+router.post('/polly/say', (req, res) => {
+	var params  = {
+		    OutputFormat: "mp3",
+		    SampleRate: "16000",
+		    Text: "",
+		    TextType: "text",
+		    VoiceId: "Matthew"
+		  };
+
+	let synthCB = function(err, data){
+		return res.status(200).json({status:'success', data: data});
+	}; 
+
+	polly.synthesizeSpeech(params, synthCB);
+
+});
+
+
+
 
 router.post('/collection/create', (req,res)=>{
 	var params = {
@@ -395,8 +421,10 @@ function dissectFaces(s3img){
 }
 	
 
-
+/*
 dissectFaces ('mo.jpg');
+*/
+
 
 function searchImage(s3img){
 	var params = {

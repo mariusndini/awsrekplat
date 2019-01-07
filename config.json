@@ -15,13 +15,17 @@
         "accessKeyId": "AKIAIHLZJJKAOE33FGEQ",
         "secretAccessKey": "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"
     },
-    "dyndb":{
+    "dyndb":{ 
         "region": "us-east-2",
         "accessKeyId": "AKIAIHLZJJKAOE33FGEQ",
         "secretAccessKey": "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",
         "apiVersion": "2012-08-10"
+    },
 
-
+    "polly":{
+        "region": "us-east-2",
+        "accessKeyId": "AKIAIHLZJJKAOE33FGEQ",
+        "secretAccessKey": "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"
     }
 }
 
